@@ -334,16 +334,6 @@ sub go  {
             payment_currency => 'CAD',
             units            => $self->processor->currency_from_int   (value => 10000, precision => 8),
             price            => $self->processor->currency_from_string(value => '10',  precision => 0),
-            #units            => {
-                #precision => 8,
-                #value     => '0.0001',
-                #value_int => 10000,
-            #},
-            #price            => {
-                #precision => 0,
-                #value     => '10',
-                #value_int => 10,
-            #},
         );
         if ($place_trade1) {
             say 'success';
@@ -362,16 +352,6 @@ sub go  {
             payment_currency => 'USD',
             units            => $self->processor->currency_from_int   (value => 10000, precision => 8),
             price            => $self->processor->currency_from_string(value => '10',  precision => 0),
-            #units            => {
-                #precision => 8,
-                #value     => '0.0001',
-                #value_int => 10000,
-            #},
-            #price            => {
-                #precision => 0,
-                #value     => '10000',
-                #value_int => 10000,
-            #},
         );
         if ($place_trade2) {
             say 'success';
