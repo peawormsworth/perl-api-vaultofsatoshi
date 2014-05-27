@@ -32,9 +32,9 @@ use constant TEST_ORDERBOOK_INFO      => 0;
 use constant TEST_ORDERS_INFO         => 0;
 
 # Note: this tests both the placing and the cancelling a single trade request...
-use constant TEST_PLACE_TRADE         => 0;
+use constant TEST_PLACE_TRADE         => 1;
 # This is only tested when a place_trade test is also performed...
-use constant TEST_ORDER_DETAIL_INFO   => 0;
+use constant TEST_ORDER_DETAIL_INFO   => 1;
 
 
 main->new->go;
@@ -350,8 +350,8 @@ sub go  {
             type             => 'ask',
             order_currency   => 'BTC',
             payment_currency => 'USD',
-            units            => $self->processor->currency_from_int   (value => 10000, precision => 8),
-            price            => $self->processor->currency_from_string(value => '10',  precision => 0),
+            units            => $self->processor->currency_from_int   (value => 10000,   precision => 8),
+            price            => $self->processor->currency_from_string(value => '10000', precision => 0),
         );
         if ($place_trade2) {
             say 'success';

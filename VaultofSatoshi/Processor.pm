@@ -13,6 +13,8 @@ use JSON;
 use MIME::Base64;
 use Time::HiRes qw(gettimeofday);
 use Digest::SHA qw(hmac_sha512_hex);
+#use Math::BigInt;
+use Math::BigFloat;
 
 use VaultofSatoshi::Ticker;
 use VaultofSatoshi::OrderBook;
@@ -114,11 +116,9 @@ sub send {
             }
    
             $request->header('Accept'   => 'application/json');
-#warn Data::Dumper->Dump([$request, $self->http_request]);
-#warn sprintf "Content: %s\n", $self->http_request->content;
+            #warn Data::Dumper->Dump([$request, $self->http_request]);
+            #warn sprintf "Content: %s\n", $self->http_request->content;
             if ($self->request->is_private) {
-                #$request->header('Api-Key'  => $self->key);
-                #$request->header('Api-Sign' => $self->sign);
                 $request->header(api_key  => $self->key);
                 $request->header(api_sign => $self->sign);
             }
@@ -204,17 +204,8 @@ sub currency_from_int {
     return {
         precision => $args{precision},
         value_int => $args{value},
-        value     => sprintf(sprintf('%%.%sf', $args{precision}), $args{value} / (10 ** $args{precision})),
-    }
-    #$c = new stdClass();
-    #$c->precision = $precision;
-    #// value will be a "string" that contains a precise floating point number.
-    #// Need to use an arbitrary precision math library to guarantee the right
-    #// answer to the right number of decimal places due to the finite precision
-    #// available in computer based floating point implementation.
-    #$c->value = bcdiv($value_int, bcpow("10", $precision, $precision), $precision);
-    #$c->value_int = $value_int;
-    #return $c;
+        value     => '' . scalar Math::BigFloat->new($args{value})->bdiv(int('1' . '0' x scalar $args{precision}), undef, -1 * int $args{precision}, 'common'),
+    };
 }
 
 # I am not sure how to duplicate bcmul() or bcpow() in perl...
@@ -224,16 +215,10 @@ sub currency_from_string {
 
     return {
         precision => $args{precision},
-        value_int => sprintf('%d', $args{value} * (10 ** $args{precision})),
         value     => $args{value},
-    }
-    #$c = new stdClass();
-    #$c->precision = $precision;
-    #$c->value = $value;
-    #// Value is a "string" that contains a precise floating point number. Convert
-    #// it to an int in a way that avoids any floating point precision artifacts.
-    #$c->value_int = intval(bcmul($value, bcpow("10", $precision, $precision), $precision));
-    #return $c;
+        #value_int=> '' . $value_int,
+        value_int => '' . scalar Math::BigFloat->new($args{value})->bmul(int('1' . '0' x scalar $args{precision}), undef, 0, 'common'),
+    };
 }
 
 # this method makes the action call routines simpler...
