@@ -196,6 +196,46 @@ sub nonce        { sprintf '%d%06d' => gettimeofday }
 sub json         { shift->{json} ||= JSON->new }
 sub is_success   { defined shift->response }
 
+# I am not sure how to duplicate bcdiv() or bcpow() in perl...
+sub currency_from_int {
+    my $self = shift;
+    my %args = @_;
+
+    return {
+        precision => $args{precision},
+        value_int => $args{value},
+        value     => sprintf(sprintf('%%.%sf', $args{precision}), $args{value} / (10 ** $args{precision})),
+    }
+    #$c = new stdClass();
+    #$c->precision = $precision;
+    #// value will be a "string" that contains a precise floating point number.
+    #// Need to use an arbitrary precision math library to guarantee the right
+    #// answer to the right number of decimal places due to the finite precision
+    #// available in computer based floating point implementation.
+    #$c->value = bcdiv($value_int, bcpow("10", $precision, $precision), $precision);
+    #$c->value_int = $value_int;
+    #return $c;
+}
+
+# I am not sure how to duplicate bcmul() or bcpow() in perl...
+sub currency_from_string {
+    my $self = shift;
+    my %args = @_;
+
+    return {
+        precision => $args{precision},
+        value_int => sprintf('%d', $args{value} * (10 ** $args{precision})),
+        value     => $args{value},
+    }
+    #$c = new stdClass();
+    #$c->precision = $precision;
+    #$c->value = $value;
+    #// Value is a "string" that contains a precise floating point number. Convert
+    #// it to an int in a way that avoids any floating point precision artifacts.
+    #$c->value_int = intval(bcmul($value, bcpow("10", $precision, $precision), $precision));
+    #return $c;
+}
+
 # this method makes the action call routines simpler...
 sub _class_action {
     my $self = shift;

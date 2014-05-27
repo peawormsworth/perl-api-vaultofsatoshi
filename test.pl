@@ -16,10 +16,10 @@ use constant API_KEY                  => 'Vault of Satoshi API key    goes here'
 use constant API_SECRET               => 'Vault of Satoshi API secret goes here';
 
 # Public Tests...
-use constant TEST_TICKER              => 0;
-use constant TEST_ORDERBOOK           => 0;
-use constant TEST_CURRENCY            => 0;
-use constant TEST_TRANSACTIONS        => 0;
+use constant TEST_TICKER              => 1;
+use constant TEST_ORDERBOOK           => 1;
+use constant TEST_CURRENCY            => 1;
+use constant TEST_TRANSACTIONS        => 1;
 
 use constant TEST_CURRENCY_INFO       => 0;
 use constant TEST_ACCOUNT_INFO        => 0;
@@ -32,9 +32,9 @@ use constant TEST_ORDERBOOK_INFO      => 0;
 use constant TEST_ORDERS_INFO         => 0;
 
 # Note: this tests both the placing and the cancelling a single trade request...
-use constant TEST_PLACE_TRADE         => 1;
+use constant TEST_PLACE_TRADE         => 0;
 # This is only tested when a place_trade test is also performed...
-use constant TEST_ORDER_DETAIL_INFO   => 1;
+use constant TEST_ORDER_DETAIL_INFO   => 0;
 
 
 main->new->go;
@@ -279,16 +279,8 @@ sub go  {
             type             => 'bid',
             order_currency   => 'BTC',
             payment_currency => 'CAD',
-            units            => {
-                precision => 0,
-                value     => '2',
-                value_int => 2,
-            },
-            price            => {
-                precision => 5,
-                value     => '100000000',
-                value_int => 1000.00000,
-            },
+            units            => $self->processor->currency_from_int   (value => 2,            precision => 0),
+            price            => $self->processor->currency_from_string(value => '1000.00000', precision => 5),
         );
         if ($quote) {
             say 'success';
@@ -340,16 +332,18 @@ sub go  {
             type             => 'bid',
             order_currency   => 'BTC',
             payment_currency => 'CAD',
-            units            => {
-                precision => 8,
-                value     => '0.0001',
-                value_int => 10000,
-            },
-            price            => {
-                precision => 0,
-                value     => '10',
-                value_int => 10,
-            },
+            units            => $self->processor->currency_from_int   (value => 10000, precision => 8),
+            price            => $self->processor->currency_from_string(value => '10',  precision => 0),
+            #units            => {
+                #precision => 8,
+                #value     => '0.0001',
+                #value_int => 10000,
+            #},
+            #price            => {
+                #precision => 0,
+                #value     => '10',
+                #value_int => 10,
+            #},
         );
         if ($place_trade1) {
             say 'success';
@@ -366,16 +360,18 @@ sub go  {
             type             => 'ask',
             order_currency   => 'BTC',
             payment_currency => 'USD',
-            units            => {
-                precision => 8,
-                value     => '0.0001',
-                value_int => 10000,
-            },
-            price            => {
-                precision => 0,
-                value     => '10000',
-                value_int => 10000,
-            },
+            units            => $self->processor->currency_from_int   (value => 10000, precision => 8),
+            price            => $self->processor->currency_from_string(value => '10',  precision => 0),
+            #units            => {
+                #precision => 8,
+                #value     => '0.0001',
+                #value_int => 10000,
+            #},
+            #price            => {
+                #precision => 0,
+                #value     => '10000',
+                #value_int => 10000,
+            #},
         );
         if ($place_trade2) {
             say 'success';
