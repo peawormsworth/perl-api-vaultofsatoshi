@@ -3,7 +3,7 @@ perl-api-vaultofsatoshi
 
 Perl module for VaultofSatoshi API
 
-These perl modules have not been extensively tested. Please use with causion.
+These perl modules have not been extensively tested. Please use with caution.
 
 There is no documentation (pods) yet. But the test.pl file should get you started.
 

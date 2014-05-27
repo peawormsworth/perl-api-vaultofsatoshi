@@ -171,7 +171,7 @@ sub process_response {
         }
     }
     else {
-        # we did not get valid content from BitPay. Assume an unknown HTTP error occurred...
+        # we did not get valid content from their server. Assume an unknown HTTP error occurred...
         $self->error({
             type    => __PACKAGE__,
             message => 'no status',

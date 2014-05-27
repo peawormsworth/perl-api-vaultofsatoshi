@@ -3,7 +3,7 @@
 use 5.010;
 use warnings;
 use strict;
-use lib qw(..);
+use lib qw(.);
 
 use VaultofSatoshi::Processor;
 use Data::Dumper;
