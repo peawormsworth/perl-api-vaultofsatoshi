@@ -15,6 +15,7 @@ use Time::HiRes qw(gettimeofday);
 use Digest::SHA qw(hmac_sha512_hex);
 #use Math::BigInt;
 use Math::BigFloat;
+use Data::Dumper;
 
 use VaultofSatoshi::Ticker;
 use VaultofSatoshi::OrderBook;
@@ -36,8 +37,9 @@ use VaultofSatoshi::CancelTrade;
 use constant ATTRIBUTES       => qw(key secret);
 use constant ERROR_NO_REQUEST => 'No request object to send';
 use constant ERROR_NOT_READY  => 'Not enough information to send a %s request';
-
-sub attributes { ATTRIBUTES }
+use constant ERROR_READY      => 'The request IS%s READY to send';
+use constant ERROR_VOS        => 'Vault of Satoshi error: "%s"';
+use constant ERROR_UNKNOWN    => 'VaultofSatoshi returned an unknown status';
 
 use constant CLASS_ACTION_MAP => {
     # Public requests:
@@ -70,7 +72,7 @@ sub is_ready_to_send {
     if (not $self->request->is_private or (defined $self->secret and defined $self->key)) {
        $ready = $self->request->is_ready_to_send;
     }
-    warn sprintf "The request IS%s READY to send\n", ($ready ? '' : ' NOT');
+    warn sprintf(ERROR_READY, $ready ? '' : ' NOT') . "\n";
 
     return $ready;
 }
@@ -160,12 +162,12 @@ sub process_response {
             $self->response($content->{data});
         }
         elsif ($content->{status} eq 'error') {
-            warn sprintf "Vault of Satoshi error: '%s'\n", $content->{message};
+            warn sprintf(ERROR_VOS, $content->{message}) . "\n";
             $self->error($content->{message});
         }
         else {
             # we got a response but the result was not 'success'...
-            warn "VaultofSatoshi returned an unknown status...\n";
+            warn ERROR_UNKNOWN . "\n";
             warn Data::Dumper->Dump([$content],['Invalid VaultofSatoshi Response Content']);
             $self->error('unknown status');
         }
@@ -180,6 +182,38 @@ sub process_response {
     return $self->is_success;
 }
 
+# generalized currency hash creator...
+# precision and either value or value_int are required.
+# remember that value is a 'string' and not a float input please...
+sub currency_object {
+    my $self = shift;
+    my %args = @_;
+
+    my $precision = $args{precision}; # the number of (right) digits of the 'value_int' string that come before the decimal point.
+    my $value_int = $args{value_int}; # a number representation with no decimal including 0's for left least significant digits.
+    my $value     = $args{value};     # a string representation of all significant digits with a decimal point.
+    if (defined $value_int) {
+        my $big = Math::BigFloat->new($value_int)->bdiv(10 ** $precision);
+        $big->precision(-1 * $precision); # Math::BigFloat precision() uses negative numbers for precision to right of decimal.
+        $value = $big->bstr;
+    }
+    else {
+        my $big = Math::BigFloat->new($value)->bmul(10 ** $precision);
+        $big->precision(0); # because we want no decimal values (and there shouldnt be any).
+        $value_int = int $big->bstr;
+    }
+    #print Dumper {
+        #precision => $precision,
+        #value_int => $value_int,
+        #value     => $value,
+    #};
+    return {
+        precision => $precision,
+        value_int => $value_int,
+        value     => $value,
+    };
+}
+
 # TODO: The below is not true... please correct this wording...
 # signature : is a HMAC-SHA256 encoded message containing nonce, API token, relative API
 # request path and alphabetically sorted post parameters. The message must be generated using
@@ -192,34 +226,10 @@ sub sign {
     return encode_base64(hmac_sha512_hex($path . chr(0) . $content, $self->secret), '');
 }
 
-sub nonce        { sprintf '%d%06d' => gettimeofday }
-sub json         { shift->{json} ||= JSON->new }
-sub is_success   { defined shift->response }
-
-# I am not sure how to duplicate bcdiv() or bcpow() in perl...
-sub currency_from_int {
-    my $self = shift;
-    my %args = @_;
-
-    return {
-        precision => $args{precision},
-        value_int => $args{value},
-        value     => '' . scalar Math::BigFloat->new($args{value})->bdiv(int('1' . '0' x scalar $args{precision}), undef, -1 * int $args{precision}, 'common'),
-    };
-}
-
-# I am not sure how to duplicate bcmul() or bcpow() in perl...
-sub currency_from_string {
-    my $self = shift;
-    my %args = @_;
-
-    return {
-        precision => $args{precision},
-        value     => $args{value},
-        #value_int=> '' . $value_int,
-        value_int => '' . scalar Math::BigFloat->new($args{value})->bmul(int('1' . '0' x scalar $args{precision}), undef, 0, 'common'),
-    };
-}
+sub nonce     { sprintf '%d%06d' => gettimeofday }
+sub json      { shift->{json} ||= JSON->new }
+sub is_success{ defined shift->response }
+sub attributes{ ATTRIBUTES }
 
 # this method makes the action call routines simpler...
 sub _class_action {

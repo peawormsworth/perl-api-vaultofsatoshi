@@ -279,8 +279,8 @@ sub go  {
             type             => 'bid',
             order_currency   => 'BTC',
             payment_currency => 'CAD',
-            units            => $self->processor->currency_from_int   (value => 2,            precision => 0),
-            price            => $self->processor->currency_from_string(value => '1000.00000', precision => 5),
+            units            => $self->processor->currency_object(value_int => 2,            precision => 0),
+            price            => $self->processor->currency_object(value     => '1000.00000', precision => 5),
         );
         if ($quote) {
             say 'success';
@@ -332,8 +332,8 @@ sub go  {
             type             => 'bid',
             order_currency   => 'BTC',
             payment_currency => 'CAD',
-            units            => $self->processor->currency_from_int   (value => 10000, precision => 8),
-            price            => $self->processor->currency_from_string(value => '10',  precision => 0),
+            units            => $self->processor->currency_object(value_int => 10000, precision => 8),
+            price            => $self->processor->currency_object(value     => '10',  precision => 0),
         );
         if ($place_trade1) {
             say 'success';
@@ -350,8 +350,8 @@ sub go  {
             type             => 'ask',
             order_currency   => 'BTC',
             payment_currency => 'USD',
-            units            => $self->processor->currency_from_int   (value => 10000,   precision => 8),
-            price            => $self->processor->currency_from_string(value => '10000', precision => 0),
+            units            => $self->processor->currency_object(value_int => 10000,   precision => 8),
+            price            => $self->processor->currency_object(value     => '10000', precision => 0),
         );
         if ($place_trade2) {
             say 'success';

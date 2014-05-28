@@ -1,0 +1,8 @@
+In no particular order:
+
+- fix VaultofSotashi currency_from_string() and currency_from_int(). It does not seem to be producing the correct query string values expected by vos.
+- verify the generated Time value is up to spec.
+- find how to determine the server time on vos for this "time value must be within 10 seconds of the time on the API server or the request will be rejected".
+
+
+
